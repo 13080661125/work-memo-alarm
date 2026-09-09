@@ -49,7 +49,10 @@ input,textarea{outline:none;border:0;background:transparent;}
    ========================================================================== */
 .app{
   position:relative;max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;
-  background:var(--bg);display:flex;flex-direction:column;overflow:hidden;
+  /* 背景：柯基草地水彩图 + 半透明白蒙版，保证文字可读 */
+  background-image:linear-gradient(rgba(244,246,249,.80), rgba(244,246,249,.80)), url('corgi_bg.jpg');
+  background-size:cover;background-position:center;background-repeat:no-repeat;
+  display:flex;flex-direction:column;overflow:hidden;
 }
 @media (min-width:520px){
   .app{height:100vh;box-shadow:0 10px 40px rgba(16,24,40,.16);}
@@ -117,7 +120,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 9
 
 /* ---------------- 卡片 ---------------- */
 .card{
-  position:relative;background:var(--card);border-radius:var(--radius);
+  position:relative;background:rgba(255,255,255,.86);border-radius:var(--radius);
   box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden;
 }
 .card-row{display:flex;align-items:flex-start;gap:11px;padding:13px 14px 13px 16px;}
@@ -180,7 +183,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 9
 .sheet.show{display:block;}
 .sheet .mask{position:absolute;inset:0;background:rgba(17,24,39,.38);}
 .sheet .panel{
-  position:absolute;left:0;right:0;bottom:0;top:0;background:var(--bg);
+  position:absolute;left:0;right:0;bottom:0;top:0;background:rgba(255,255,255,.96);
   display:flex;flex-direction:column;transform:translateY(100%);
   transition:transform .26s cubic-bezier(.32,.72,.3,1);
 }
@@ -220,8 +223,9 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 9
    ========================================================================== */
 .ring{
   position:fixed;inset:0;z-index:100;display:none;
-  background:linear-gradient(165deg,#1E3A8A 0%,#2563EB 55%,#3B82F6 100%);
-  color:#fff;flex-direction:column;align-items:center;justify-content:center;
+  background-image:linear-gradient(rgba(240,250,250,.86), rgba(240,250,250,.86)), url('corgi_bg.jpg');
+  background-size:cover;background-position:center;background-repeat:no-repeat;
+  color:var(--text);flex-direction:column;align-items:center;justify-content:center;
   padding:40px 28px;text-align:center;
 }
 .ring.show{display:flex;animation:fadein .25s ease;}
@@ -235,8 +239,8 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 9
 .ring .btns button{
   flex:1;padding:15px 0;border-radius:14px;font-size:15.5px;font-weight:600;
 }
-.ring .b-snooze{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.55);color:#fff;}
-.ring .b-stop{background:#fff;color:var(--primary);}
+.ring .b-snooze{background:rgba(255,255,255,.7);border:1.5px solid var(--primary);color:var(--primary);}
+.ring .b-stop{background:var(--primary);color:#fff;}
 .ring button:active{opacity:.8;}
 
 /* 提示条 */
