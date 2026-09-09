@@ -85,7 +85,7 @@ code, ref0 = req('GET', '/repos/%s/%s/git/ref/heads/main' % (USER, REPO))
 if code == 200 and ref0.get('object'):
     parents = [ref0['object']['sha']]
 code, cm = req('POST', '/repos/%s/%s/git/commits' % (USER, REPO), {
-    'message': 'web: 应用底色换成水彩柯基草地背景图（corgi_bg.jpg），降低透明度保证可读',
+    'message': 'web: 使用说明弹窗正文精简为「添加到主屏幕」指引',
     'tree': tree['sha'],
     'parents': parents,
 })

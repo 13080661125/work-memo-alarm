@@ -951,17 +951,7 @@ document.addEventListener('input', function(e){
 function showAbout(){
   var nPerm = (window.Notification ? Notification.permission : 'unsupported');
   var h = '<h3>使用说明</h3>' +
-    '<p>这是 <b>工作备忘录 + 闹钟提醒</b> 的浏览器版，界面与功能和原生 App 一致，' +
-    '数据保存在本机的浏览器存储中，<b>刷新、关闭浏览器都不会丢失</b>。</p>' +
-    '<p><b>闹钟在浏览器里的限制（重要）：</b></p>' +
-    '<ul>' +
-      '<li>页面需要<b>保持在浏览器中打开</b>。完全关闭标签页 / 浏览器后，闹钟不会响。</li>' +
-      '<li>标签页切到后台时，浏览器会降低定时器频率，闹钟可能<b>延迟几十秒到 1 分钟</b>。</li>' +
-      '<li>苹果 iPhone 的 Safari <b>不支持网页震动</b>，且后台限制更严格；安卓 Chrome 表现最好。</li>' +
-      '<li>本页已适配「添加到主屏幕」：浏览器菜单 → 添加到主屏幕，之后可像 App 一样全屏打开。</li>' +
-    '</ul>' +
-    '<p><b>想要真正的后台闹钟</b>（锁屏也能响、全屏弹窗、开屏就响），需要安装原生 App：' +
-    '安卓装 APK，苹果装 IPA。详见项目 README 与 docs/05 云端打包教程。</p>' +
+    '<p>• 如何「添加到主屏幕」：浏览器右下角...菜单 →共享→查看更多→ 添加到主屏幕，之后可像 App 一样全屏打开。</p>' +
     '<p style="margin-top:12px">系统通知权限：<b>' +
       (nPerm === 'granted' ? '已开启' : nPerm === 'denied' ? '已被拒绝' : nPerm === 'unsupported' ? '浏览器不支持' : '未申请') +
     '</b></p>' +
