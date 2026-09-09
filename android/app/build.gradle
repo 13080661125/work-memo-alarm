@@ -1,0 +1,71 @@
+// =============================================================
+// Android 应用级构建脚本
+// 覆盖到 android/app/build.gradle
+// =============================================================
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // Flutter 的 Gradle 插件必须放在 Android、Kotlin 插件之后
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.example.work_memo_alarm"
+    // 编译 SDK 版本：建议与本地安装的最新稳定版保持一致
+    compileSdk = 35
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17
+    }
+
+    defaultConfig {
+        // 应用唯一标识（上架后不可更改，请替换为自己的域名倒序）
+        applicationId = "com.example.work_memo_alarm"
+        // 最低支持 Android 6.0；如需覆盖更老设备可下调，但插件可能不兼容
+        minSdk = 23
+        // 目标 SDK：Android 12+ 的精确闹钟权限、13+ 的通知权限都依赖较高 targetSdk
+        targetSdk = 35
+        versionCode = flutterVersionCode.toInteger()
+        versionName = flutterVersionName
+    }
+
+    signingConfigs {
+        release {
+            // 读取项目根目录的 key.properties（没有时用 debug 签名，便于先跑通流程）
+            // 生成方法见 docs/02-打包APK与IPA教程.md
+            def keystorePropertiesFile = rootProject.file("key.properties")
+            if (keystorePropertiesFile.exists()) {
+                def keystoreProperties = new Properties()
+                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+                storeFile = file(keystoreProperties['storeFile'])
+                storePassword = keystoreProperties['storePassword']
+                keyAlias = keystoreProperties['keyAlias']
+                keyPassword = keystoreProperties['keyPassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // 有正式签名配置就用正式签名，否则退回 debug 签名
+            signingConfig = signingConfigs.release.storeFile != null
+                    ? signingConfigs.release
+                    : signingConfigs.debug
+
+            // 关闭混淆：本项目无敏感逻辑，关闭可避免反射问题；
+            // 如需开启，请同步配置 android/app/proguard-rules.pro
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}

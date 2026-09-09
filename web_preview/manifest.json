@@ -1,0 +1,20 @@
+{
+  "name": "工作备忘录 · 闹钟提醒",
+  "short_name": "备忘录",
+  "description": "简约商务风格的工作备忘录与闹钟提醒（浏览器版）",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F6F9",
+  "theme_color": "#2563EB",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

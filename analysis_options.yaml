@@ -1,0 +1,12 @@
+# Dart 静态检查规则（使用官方 flutter_lints 默认规则）
+# 若某行代码确实需要忽略某个提示，可在该行上方添加：
+#   // ignore: 规则名
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    # 构造函数加 const 可以提升性能，这里打开提醒
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    # 强制给公开 API 写文档注释（本项目要求详细中文注释，便于阅读）
+    public_member_api_docs: false

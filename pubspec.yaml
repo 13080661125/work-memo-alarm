@@ -1,0 +1,54 @@
+name: work_memo_alarm
+description: "工作备忘录 + 闹钟提醒（Flutter 跨平台，适配 Android 与 iOS）"
+publish_to: 'none'
+
+# 版本号规则：+ 号前是版本名，+ 号后是构建号（Android versionCode / iOS CFBundleVersion）
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # iOS 风格图标（CupertinoIcons）
+  cupertino_icons: ^1.0.8
+
+  # 状态管理：官方推荐的轻量方案，配合 ChangeNotifier 使用
+  provider: ^6.1.5+1
+
+  # 本地持久化：以 JSON 字符串形式保存备忘录与闹钟
+  shared_preferences: ^2.5.5
+
+  # 本地通知（闹钟的核心：支持精确定时、重复、全屏意图、通知按钮）
+  flutter_local_notifications: ^22.3.0
+
+  # 时区处理：定时通知必须使用带时区的绝对时间，避免夏令时/时区导致偏移
+  timezone: ^0.11.1
+  flutter_timezone: ^5.1.0
+
+  # 权限申请：通知权限、精确闹钟权限、电池优化白名单
+  permission_handler: ^13.0.2
+
+  # 响铃：播放内置铃声（贪睡/关闭前的持续响铃）
+  audioplayers: ^6.8.1
+
+  # 震动：闹钟触发时的震动反馈
+  vibration: ^3.2.1
+
+  # 时间格式化（统一 24 小时制）
+  intl: ^0.20.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # 内置铃声资源（同时需要手工拷贝到 android/app/src/main/res/raw 与 iOS 工程，
+  # 详见 docs/01-环境搭建与运行.md）
+  assets:
+    - assets/ringtones/

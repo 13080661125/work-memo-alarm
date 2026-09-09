@@ -1,0 +1,181 @@
+# =============================================================
+# 云端自动打包：安卓 APK + 苹果 IPA
+# -------------------------------------------------------------
+# 触发方式：
+#   1) 推送到 main 分支           → 自动构建
+#   2) 打 tag，如 v1.0.0          → 自动构建（推荐用于正式发版）
+#   3) GitHub 网页上手动点 Run workflow → 自动构建
+#
+# 产物（Actions 页面 → Artifacts 下载）：
+#   android-apk            → 可直接安装到安卓手机的 APK
+#   ios-unsigned-app       → 未签名的 iOS 产物（需 Mac 签名后才能装 iPhone）
+# =============================================================
+name: Build APK & IPA
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: '构建类型'
+        required: true
+        default: 'release'
+        type: choice
+        options: [release, debug]
+
+jobs:
+  # ---------------------------------------------------------
+  # 一、安卓 APK（无需任何签名配置，产出即可安装）
+  # ---------------------------------------------------------
+  android:
+    name: 安卓 APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 安装 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: 安装 Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: 补齐安卓原生工程脚手架
+        # 本仓库只提交了关键配置文件，完整的 Gradle 脚手架在这里自动生成。
+        # 生成后用 git checkout 把本仓库提供的配置覆盖回去，
+        # 这样既拿到脚手架，又保留我们定制的 Manifest / MainActivity / build.gradle。
+        run: |
+          set -e
+          if [ ! -f "android/gradlew" ]; then
+            echo ">>> 未检测到 Gradle 脚手架，自动生成"
+            flutter create --platforms=android,ios --org com.example --project-name work_memo_alarm .
+            git checkout -- lib pubspec.yaml analysis_options.yaml android ios 2>/dev/null || true
+          else
+            echo ">>> 已存在安卓工程，跳过生成"
+          fi
+
+      - name: 接受 Android SDK 许可
+        run: yes | flutter doctor --android-licenses || true
+
+      - name: 安装依赖
+        run: flutter pub get
+
+      - name: 构建 debug APK（体积大、含调试信息，安装最快）
+        run: flutter build apk --debug
+
+      - name: 构建 release APK（按 CPU 拆分，推荐安装这个）
+        run: flutter build apk --release --split-per-abi
+
+      - name: 上传 APK 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 30
+
+  # ---------------------------------------------------------
+  # 二、安卓正式签名 APK（可选）
+  # ---------------------------------------------------------
+  # 需要你先在仓库 Settings → Secrets 里配置 4 个变量（详见 docs/05）：
+  #   KEYSTORE_BASE64 / KEYSTORE_PASSWORD / KEY_ALIAS / KEY_PASSWORD
+  # 没配置时这个任务会自动跳过，不影响上面的构建。
+  android-signed:
+    name: 安卓正式签名 APK（可选）
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    needs: android
+    if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: 还原签名文件
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          cat > android/key.properties <<EOF
+          storeFile=keystore.jks
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+
+      - name: 补齐安卓原生工程脚手架
+        run: |
+          set -e
+          if [ ! -f "android/gradlew" ]; then
+            flutter create --platforms=android,ios --org com.example --project-name work_memo_alarm .
+            git checkout -- lib pubspec.yaml analysis_options.yaml android ios 2>/dev/null || true
+          fi
+
+      - run: yes | flutter doctor --android-licenses || true
+      - run: flutter pub get
+      - run: flutter build apk --release --split-per-abi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-signed
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 30
+
+  # ---------------------------------------------------------
+  # 三、iOS 构建（验证可编译，产出未签名包）
+  # ---------------------------------------------------------
+  # 注意：未签名的 IPA / app 无法直接安装到 iPhone，
+  # 这是苹果的安全机制，必须在 Mac 上用开发者账号签名。
+  # 有 Mac 的话，下载本产物后可直接重签名安装，省去编译等待。
+  ios:
+    name: iOS 未签名构建
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: 补齐 iOS 原生工程脚手架
+        run: |
+          set -e
+          if [ ! -d "ios/Runner.xcodeproj" ]; then
+            flutter create --platforms=android,ios --org com.example --project-name work_memo_alarm .
+            git checkout -- lib pubspec.yaml analysis_options.yaml android ios 2>/dev/null || true
+          fi
+
+      - name: 安装 CocoaPods 依赖
+        run: |
+          cd ios
+          pod install --repo-update
+          cd ..
+
+      - name: 构建 iOS（不签名）
+        run: flutter build ios --release --no-codesign
+
+      - name: 打包产物
+        run: |
+          mkdir -p build/ios/artifact
+          cd build/ios/iphoneos
+          zip -r ../artifact/Runner-unsigned.zip Runner.app
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned-app
+          path: build/ios/artifact/Runner-unsigned.zip
+          retention-days: 30

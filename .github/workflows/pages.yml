@@ -1,0 +1,64 @@
+# =============================================================
+# 浏览器版自动部署到 GitHub Pages
+# -------------------------------------------------------------
+# 做什么：把 web_preview/ 目录（纯静态 HTML）发布成一个公网网址，
+#        手机浏览器打开即用，不用装 App、不用打包。
+#
+# 触发：推送代码时（web_preview 有变动才跑）/ 网页手动点 Run workflow
+#
+# 首次使用必须做一步（只需一次）：
+#   仓库 Settings → Pages → Source 选 "GitHub Actions"，然后 Save。
+#   之后每次推送，网址内容自动更新，网址不变。
+#
+# 部署成功后网址在哪看：
+#   Settings → Pages 顶部，或 Actions 任务里 deploy 步骤的 URL
+#   格式：https://<你的用户名>.github.io/<仓库名>/
+# =============================================================
+name: 部署浏览器版到网页
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'web_preview/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+# Pages 部署需要的权限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同时只跑一个部署任务，避免互相覆盖
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 打包静态文件
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+
+      - name: 上传待发布内容
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web_preview          # 只发布这个目录：index.html / manifest.json / icon.svg
+
+  deploy:
+    name: 发布到网页
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 部署
+        id: deployment
+        uses: actions/deploy-pages@v4

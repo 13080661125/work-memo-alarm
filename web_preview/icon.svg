@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- 背景：商务蓝圆角方块 -->
+  <rect width="192" height="192" rx="42" fill="#2563EB"/>
+  <!-- 文档主体 -->
+  <rect x="52" y="40" width="74" height="98" rx="10" fill="#FFFFFF"/>
+  <!-- 文档上的文字线 -->
+  <rect x="66" y="62" width="46" height="8" rx="4" fill="#2563EB" opacity="0.85"/>
+  <rect x="66" y="82" width="46" height="6" rx="3" fill="#93B4F5"/>
+  <rect x="66" y="98" width="46" height="6" rx="3" fill="#93B4F5"/>
+  <rect x="66" y="114" width="30" height="6" rx="3" fill="#93B4F5"/>
+  <!-- 右下角小闹钟 -->
+  <circle cx="126" cy="128" r="30" fill="#1E3A8A"/>
+  <circle cx="126" cy="128" r="23" fill="#FFFFFF"/>
+  <path d="M126 114v15l10 7" stroke="#1E3A8A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M112 100l6-7M140 100l-6-7" stroke="#1E3A8A" stroke-width="5" stroke-linecap="round" fill="none"/>
+</svg>
