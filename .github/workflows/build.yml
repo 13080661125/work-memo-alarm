@@ -24,6 +24,11 @@ on:
         default: 'release'
         type: choice
         options: [release, debug]
+      sign:
+        description: '是否额外构建正式签名 APK（需先在 Settings-Secrets 配置签名密钥）'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   # ---------------------------------------------------------
@@ -87,13 +92,17 @@ jobs:
   # ---------------------------------------------------------
   # 需要你先在仓库 Settings → Secrets 里配置 4 个变量（详见 docs/05）：
   #   KEYSTORE_BASE64 / KEYSTORE_PASSWORD / KEY_ALIAS / KEY_PASSWORD
-  # 没配置时这个任务会自动跳过，不影响上面的构建。
+  # 触发方式：网页上手动 Run workflow，并勾选 sign。
+  #
+  # 注意：GitHub 不允许在 job 级别的 if 里使用 secrets（会报
+  # "Unrecognized named-value: 'secrets'" 导致整个工作流解析失败），
+  # 所以这里改用 inputs 控制、放到 step 级别再读取 secrets。
   android-signed:
     name: 安卓正式签名 APK（可选）
     runs-on: ubuntu-latest
     timeout-minutes: 40
     needs: android
-    if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.sign }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -105,7 +114,18 @@ jobs:
           channel: stable
           cache: true
 
+      - name: 检查签名密钥是否已配置
+        id: keycheck
+        run: |
+          if [ -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "未检测到签名密钥，跳过正式签名构建（不影响上面的普通 APK）"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: 还原签名文件
+        if: steps.keycheck.outputs.skip == 'false'
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
           cat > android/key.properties <<EOF
@@ -116,6 +136,7 @@ jobs:
           EOF
 
       - name: 补齐安卓原生工程脚手架
+        if: steps.keycheck.outputs.skip == 'false'
         run: |
           set -e
           if [ ! -f "android/gradlew" ]; then
@@ -123,11 +144,21 @@ jobs:
             git checkout -- lib pubspec.yaml analysis_options.yaml android ios 2>/dev/null || true
           fi
 
-      - run: yes | flutter doctor --android-licenses || true
-      - run: flutter pub get
-      - run: flutter build apk --release --split-per-abi
+      - name: 接受 Android SDK 许可
+        if: steps.keycheck.outputs.skip == 'false'
+        run: yes | flutter doctor --android-licenses || true
 
-      - uses: actions/upload-artifact@v4
+      - name: 安装依赖
+        if: steps.keycheck.outputs.skip == 'false'
+        run: flutter pub get
+
+      - name: 构建正式签名 APK
+        if: steps.keycheck.outputs.skip == 'false'
+        run: flutter build apk --release --split-per-abi
+
+      - name: 上传签名 APK 产物
+        if: steps.keycheck.outputs.skip == 'false'
+        uses: actions/upload-artifact@v4
         with:
           name: android-apk-signed
           path: build/app/outputs/flutter-apk/*.apk
