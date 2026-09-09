@@ -261,7 +261,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 9
 <body>
 <div class="app" id="app">
   <header class="hd">
-    <div class="hd-title" id="hdTitle">工作备忘录</div>
+    <div class="hd-title" id="hdTitle"><img src="icon.jpg" alt="短腿备忘录">短腿备忘录</div>
     <button class="hd-btn" data-act="about">使用说明</button>
   </header>
   <main id="main"></main>
@@ -524,7 +524,7 @@ var ICON = {
 };
 
 function render(){
-  $('#hdTitle').textContent = ui.tab === 'memo' ? '工作备忘录' : '闹钟提醒';
+  $('#hdTitle').innerHTML = '<img src="icon.jpg" alt="短腿备忘录">短腿备忘录';
   var bar = document.querySelectorAll('.tab');
   for(var i=0;i<bar.length;i++) bar[i].classList.toggle('on', bar[i].getAttribute('data-tab') === ui.tab);
   $('#main').innerHTML = ui.tab === 'memo' ? viewMemo() : viewAlarm();

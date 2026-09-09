@@ -85,7 +85,7 @@ code, ref0 = req('GET', '/repos/%s/%s/git/ref/heads/main' % (USER, REPO))
 if code == 200 and ref0.get('object'):
     parents = [ref0['object']['sha']]
 code, cm = req('POST', '/repos/%s/%s/git/commits' % (USER, REPO), {
-    'message': '修复云端打包：job 级 if 不能使用 secrets（改为 inputs + step 级判断）',
+    'message': 'web: 浏览器版更名为「短腿备忘录」并替换柯基图标（icon.jpg）',
     'tree': tree['sha'],
     'parents': parents,
 })

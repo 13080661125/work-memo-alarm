@@ -46,7 +46,7 @@ for job in jobs.get('jobs', []):
     for s in job.get('steps', []):
         print('   [%s] %s' % (s.get('conclusion'), s.get('name')))
     if job.get('conclusion') != 'success':
-        st, blob = download('/repos/%s/%s/actions/jobs/%s/logs' % (USER, REPO, job['id']))
+        st, blob = download(API + '/repos/%s/%s/actions/jobs/%s/logs' % (USER, REPO, job['id']))
         if st in (200, 302):
             try:
                 z = zipfile.ZipFile(io.BytesIO(blob))

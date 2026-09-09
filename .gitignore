@@ -38,3 +38,6 @@ ios/Runner.xcodeproj/project.xcworkspace/
 .vscode/
 *.iml
 .DS_Store
+
+# 原生安卓工程由 flutter create 生成，定制配置用 tools/patch_android.py 注入
+/android/

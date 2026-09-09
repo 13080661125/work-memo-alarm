@@ -54,19 +54,17 @@ jobs:
           channel: stable
           cache: true
 
-      - name: 补齐安卓原生工程脚手架
-        # 本仓库只提交了关键配置文件，完整的 Gradle 脚手架在这里自动生成。
-        # 生成后用 git checkout 把本仓库提供的配置覆盖回去，
-        # 这样既拿到脚手架，又保留我们定制的 Manifest / MainActivity / build.gradle。
+      - name: 生成安卓原生工程脚手架
+        # 原生工程一律由官方 flutter create 生成（Flutter 3.4x 用 Kotlin DSL：build.gradle.kts），
+        # 仓库里不再保存 Groovy 版 android/ 文件——两者共存会导致
+        # "Build failed due to use of deleted Android v1 embedding"。
         run: |
           set -e
-          if [ ! -f "android/gradlew" ]; then
-            echo ">>> 未检测到 Gradle 脚手架，自动生成"
-            flutter create --platforms=android,ios --org com.example --project-name work_memo_alarm .
-            git checkout -- lib pubspec.yaml analysis_options.yaml android ios 2>/dev/null || true
-          else
-            echo ">>> 已存在安卓工程，跳过生成"
-          fi
+          flutter create --platforms=android --org com.example --project-name work_memo_alarm .
+          git checkout -- lib pubspec.yaml analysis_options.yaml 2>/dev/null || true
+
+      - name: 注入安卓定制配置（权限 / 锁屏拉起 / 内置铃声）
+        run: python3 tools/patch_android.py
 
       - name: 接受 Android SDK 许可
         run: yes | flutter doctor --android-licenses || true
@@ -135,14 +133,16 @@ jobs:
           keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
 
-      - name: 补齐安卓原生工程脚手架
+      - name: 生成安卓原生工程脚手架
         if: steps.keycheck.outputs.skip == 'false'
         run: |
           set -e
-          if [ ! -f "android/gradlew" ]; then
-            flutter create --platforms=android,ios --org com.example --project-name work_memo_alarm .
-            git checkout -- lib pubspec.yaml analysis_options.yaml android ios 2>/dev/null || true
-          fi
+          flutter create --platforms=android --org com.example --project-name work_memo_alarm .
+          git checkout -- lib pubspec.yaml analysis_options.yaml 2>/dev/null || true
+
+      - name: 注入安卓定制配置与签名
+        if: steps.keycheck.outputs.skip == 'false'
+        run: python3 tools/patch_android.py
 
       - name: 接受 Android SDK 许可
         if: steps.keycheck.outputs.skip == 'false'
