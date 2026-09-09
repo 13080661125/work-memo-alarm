@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-<meta name="theme-color" content="#2563EB" />
+<meta name="theme-color" content="#89CFF0" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="工作备忘录" />
+<meta name="apple-mobile-web-app-title" content="短腿备忘录" />
 <link rel="manifest" href="manifest.json" />
-<title>工作备忘录 · 闹钟提醒</title>
+<link rel="icon" href="icon.jpg" type="image/jpeg" />
+<link rel="apple-touch-icon" href="icon.jpg" />
+<title>短腿备忘录</title>
 <style>
 /* ==========================================================================
    基础变量与重置：简约商务风格（浅色系）
@@ -59,7 +61,8 @@ input,textarea{outline:none;border:0;background:transparent;}
   padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
   background:var(--card);border-bottom:1px solid var(--border);
 }
-.hd-title{font-size:19px;font-weight:600;letter-spacing:.3px;}
+.hd-title{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:600;letter-spacing:.3px;}
+.hd-title img{width:34px;height:34px;border-radius:50%;object-fit:cover;box-shadow:0 1px 3px rgba(0,0,0,.08);}
 .hd-btn{
   font-size:13px;color:var(--primary);background:var(--primary-soft);
   padding:6px 12px;border-radius:20px;font-weight:500;
